@@ -84,4 +84,7 @@ E:/prj_canhan/remote/esp32_lua/build/esp-idf/touch_element/libtouch_element.a
 E:/prj_canhan/remote/esp32_lua/build/esp-idf/usb/libusb.a
 E:/prj_canhan/remote/esp32_lua/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 E:/prj_canhan/remote/esp32_lua/build/esp-idf/lua_component/liblua_component.a
+E:/prj_canhan/remote/esp32_lua/build/esp-idf/services/libservices.a
+E:/prj_canhan/remote/esp32_lua/build/esp-idf/components/libcomponents.a
+E:/prj_canhan/remote/esp32_lua/build/esp-idf/app/libapp.a
 E:/prj_canhan/remote/esp32_lua/build/esp-idf/main/libmain.a

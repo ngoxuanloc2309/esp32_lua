@@ -9,7 +9,7 @@
 # the GLOB below picks them up automatically, no new CMakeLists.txt
 # needed per folder.
 
-file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS
+file(GLOB_RECURSE APP_SRCS
     "${CMAKE_CURRENT_LIST_DIR}/user/*.c"
 )
 

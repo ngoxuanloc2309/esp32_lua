@@ -559,6 +559,21 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("E:/prj_canhan/remote/esp32_lua/build/esp-idf/services/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("E:/prj_canhan/remote/esp32_lua/build/esp-idf/components/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("E:/prj_canhan/remote/esp32_lua/build/esp-idf/app/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("E:/prj_canhan/remote/esp32_lua/build/esp-idf/main/cmake_install.cmake")
 endif()
 

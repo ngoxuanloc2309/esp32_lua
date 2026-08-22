@@ -11,7 +11,7 @@
 # in -- the GLOB below picks them up automatically, no new
 # CMakeLists.txt needed per folder.
 
-file(GLOB_RECURSE COMPONENTS_SRCS CONFIGURE_DEPENDS
+file(GLOB_RECURSE COMPONENTS_SRCS
     "${CMAKE_CURRENT_LIST_DIR}/peripherals/*.c"
 )
 

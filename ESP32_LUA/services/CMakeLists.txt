@@ -10,7 +10,7 @@
 # in -- the GLOB below picks them up automatically, no new
 # CMakeLists.txt needed per folder.
 
-file(GLOB_RECURSE SERVICES_SRCS CONFIGURE_DEPENDS
+file(GLOB_RECURSE SERVICES_SRCS
     "${CMAKE_CURRENT_LIST_DIR}/lua_runtime/*.c"
 )
 
