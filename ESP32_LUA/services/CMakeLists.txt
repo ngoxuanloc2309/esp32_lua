@@ -8,7 +8,7 @@
 # GPIO or any other specific hardware binding.
 
 idf_component_register(
-    SRCS "sx_lua_runtime.c"
+    SRCS "lua_runtime/sx_lua_runtime.c"
     INCLUDE_DIRS "."
     REQUIRES lua_component
 )

@@ -7,7 +7,7 @@
 # "lua_component" or anything under services/ or app/.
 
 idf_component_register(
-    SRCS "sx_gpio.c"
+    SRCS "peripherals/gpio/sx_gpio.c"
     INCLUDE_DIRS "."
     REQUIRES driver
 )

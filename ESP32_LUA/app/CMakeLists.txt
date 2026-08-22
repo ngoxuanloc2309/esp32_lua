@@ -6,7 +6,7 @@
 # gpio.read backed by a fixed, allow-listed set of pins.
 
 idf_component_register(
-    SRCS "gpio_binding_app.c"
+    SRCS "user/gpio_binding_app/gpio_binding_app.c"
     INCLUDE_DIRS "."
     REQUIRES gpio lua_runtime driver
 )
