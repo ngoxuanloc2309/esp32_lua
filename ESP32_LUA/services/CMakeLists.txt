@@ -12,12 +12,14 @@
 
 file(GLOB_RECURSE SERVICES_SRCS
     "${CMAKE_CURRENT_LIST_DIR}/lua_runtime/*.c"
+    "${CMAKE_CURRENT_LIST_DIR}/http_server/*.c"
 )
 
 idf_component_register(
     SRCS ${SERVICES_SRCS}
     INCLUDE_DIRS
         "lua_runtime"
+        "http_server"
         # Add new service include dirs here, e.g. "mqtt_runtime"
-    REQUIRES lua_component
+    REQUIRES lua_component esp_http_server
 )

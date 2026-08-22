@@ -26,13 +26,13 @@ static const char *TAG = "esp_lua";
  * that a later stage will feed with Blockly-generated script text
  * received over HTTP instead. */
 static const char *kGpioTestScript =
-    "gpio.write(2, 1)\n"
-    "local level_on = gpio.read(2)\n"
-    "print(\"GPIO2 after write(1): \" .. level_on)\n"
+    "gpio.write(38, 1)\n"
+    "local level_on = gpio.read(38)\n"
+    "print(\"GPIO38 after write(1): \" .. level_on)\n"
     "\n"
-    "gpio.write(2, 0)\n"
-    "local level_off = gpio.read(2)\n"
-    "print(\"GPIO2 after write(0): \" .. level_off)\n"
+    "gpio.write(38, 0)\n"
+    "local level_off = gpio.read(38)\n"
+    "print(\"GPIO38 after write(0): \" .. level_off)\n"
     "\n"
     "return level_on, level_off\n";
 

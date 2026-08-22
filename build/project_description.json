@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "esp_lua",
-    "project_version":    "95bdd64-dirty",
+    "project_version":    "80203d5-dirty",
     "project_path":       "E:/prj_canhan/remote/esp32_lua",
     "idf_path":           "E:/esp32_idf/env/Espressif/frameworks/esp-idf-v5.4.3",
     "build_dir":          "E:/prj_canhan/remote/esp32_lua/build",
@@ -1445,13 +1445,13 @@
             "dir": "E:/prj_canhan/remote/esp32_lua/ESP32_LUA/services",
             "type": "LIBRARY",
             "lib": "__idf_services",
-            "reqs": [ "lua_component" ],
+            "reqs": [ "lua_component", "esp_http_server" ],
             "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "E:/prj_canhan/remote/esp32_lua/build/esp-idf/services/libservices.a",
-            "sources": [ "E:/prj_canhan/remote/esp32_lua/ESP32_LUA/services/lua_runtime/sx_lua_runtime.c" ],
-            "include_dirs": [ "lua_runtime" ]
+            "sources": [ "E:/prj_canhan/remote/esp32_lua/ESP32_LUA/services/http_server/sx_http_server.c", "E:/prj_canhan/remote/esp32_lua/ESP32_LUA/services/lua_runtime/sx_lua_runtime.c" ],
+            "include_dirs": [ "lua_runtime", "http_server" ]
         },
         "soc": {
             "alias": "idf::soc",
@@ -2940,11 +2940,11 @@
             "prefix": "idf",
             "dir": "E:/prj_canhan/remote/esp32_lua/ESP32_LUA/services",
             "lib": "__idf_services",
-            "reqs": [ "lua_component" ],
+            "reqs": [ "lua_component", "esp_http_server" ],
             "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "include_dirs": [ "lua_runtime" ]
+            "include_dirs": [ "lua_runtime", "http_server" ]
         },
         "app": {
             "alias": "idf::app",

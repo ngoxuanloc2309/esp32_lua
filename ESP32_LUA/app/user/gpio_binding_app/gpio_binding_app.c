@@ -8,7 +8,7 @@
  * s_pin_backing/s_gpio_instances below) to add more DI/DO channels --
  * a pin not listed here is rejected by find_pin_or_error() rather
  * than silently forwarded to the driver. */
-#define TEST_GPIO_PIN 2
+#define TEST_GPIO_PIN 38
 
 static sx_gpio_pin_t s_pin_backing[] = {
     { .port = NULL, .pin = TEST_GPIO_PIN },
