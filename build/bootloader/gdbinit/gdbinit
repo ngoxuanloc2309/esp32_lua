@@ -1,0 +1,2 @@
+source E:/prj_canhan/remote/esp32_lua/build/bootloader/gdbinit/symbols
+source E:/prj_canhan/remote/esp32_lua/build/bootloader/gdbinit/connect
