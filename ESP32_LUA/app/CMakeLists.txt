@@ -1,12 +1,22 @@
-# app/user/gpio_binding_app
+# ESP32_LUA/app  ->  ESP-IDF component name: "app"
 #
-# Top layer of the component -> service -> app chain. The only module
-# that depends on both sx_gpio (peripherals/gpio) and sx_lua_runtime
-# (services/lua_runtime) at once. Registers Lua-callable gpio.write/
-# gpio.read backed by a fixed, allow-listed set of pins.
+# Top layer of the component -> service -> app chain. Binds services +
+# components together into Lua-callable bindings, one subfolder per
+# binding module under user/ (gpio_binding_app, ...).
+#
+# Single CMakeLists.txt for the whole layer: adding a new binding
+# folder under user/<name>/ only requires dropping .c/.h files in --
+# the GLOB below picks them up automatically, no new CMakeLists.txt
+# needed per folder.
+
+file(GLOB_RECURSE APP_SRCS CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_LIST_DIR}/user/*.c"
+)
 
 idf_component_register(
-    SRCS "user/gpio_binding_app/gpio_binding_app.c"
-    INCLUDE_DIRS "."
-    REQUIRES gpio lua_runtime driver
+    SRCS ${APP_SRCS}
+    INCLUDE_DIRS
+        "user/gpio_binding_app"
+        # Add new binding include dirs here, e.g. "user/modbus_binding_app"
+    REQUIRES components services driver
 )

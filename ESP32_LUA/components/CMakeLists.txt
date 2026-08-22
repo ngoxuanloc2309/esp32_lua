@@ -1,13 +1,24 @@
-# peripherals/gpio
+# ESP32_LUA/components  ->  ESP-IDF component name: "components"
 #
-# Lowest layer of the component -> service -> app chain. Wraps the
-# ESP-IDF GPIO driver behind the sx_gpio_ops_t interface (sx_gpio.h) so
-# that nothing above this layer depends on driver/gpio.h directly.
-# Depends only on ESP-IDF's "driver" component; must never depend on
-# "lua_component" or anything under services/ or app/.
+# Lowest layer of the component -> service -> app chain. Hardware
+# peripheral wrappers (gpio, uart, modbus, ...), one subfolder per
+# peripheral under peripherals/. Depends only on ESP-IDF's own drivers
+# (driver, esp_driver_gpio, ...); must never depend on "lua_component"
+# or anything under services/ or app/.
+#
+# Single CMakeLists.txt for the whole layer: adding a new peripheral
+# folder under peripherals/<name>/ only requires dropping .c/.h files
+# in -- the GLOB below picks them up automatically, no new
+# CMakeLists.txt needed per folder.
+
+file(GLOB_RECURSE COMPONENTS_SRCS CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_LIST_DIR}/peripherals/*.c"
+)
 
 idf_component_register(
-    SRCS "peripherals/gpio/sx_gpio.c"
-    INCLUDE_DIRS "."
+    SRCS ${COMPONENTS_SRCS}
+    INCLUDE_DIRS
+        "peripherals/gpio"
+        # Add new peripheral include dirs here, e.g. "peripherals/uart"
     REQUIRES driver
 )

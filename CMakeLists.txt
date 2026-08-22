@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.16)
 set(EXTRA_COMPONENT_DIRS
     "${CMAKE_CURRENT_LIST_DIR}/ESP32_LUA/components"
     "${CMAKE_CURRENT_LIST_DIR}/ESP32_LUA/services"
-    "${CMAKE_CURRENT_LIST_DIR}/ESP32_LUA/app/"
+    "${CMAKE_CURRENT_LIST_DIR}/ESP32_LUA/app"
 )
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
