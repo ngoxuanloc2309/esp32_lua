@@ -248,22 +248,24 @@ bool sx_wifi_start_ap(const char *ap_ssid, const char *ap_password)
     return true;
 }
 
-bool sx_wifi_start_default_ap(void)
-{
-    uint8_t mac[6] = { 0 };
-    esp_err_t err = esp_read_mac(mac, ESP_MAC_WIFI_STA);
-    char ssid[SX_WIFI_SSID_MAX_LEN];
+/* ---- helpers ---------------------------------------------------------- */
 
-    if (err == ESP_OK) {
-        snprintf(ssid, sizeof(ssid), "%s%02X%02X%02X",
-                 SX_WIFI_DEFAULT_AP_SSID_PREFIX, mac[3], mac[4], mac[5]);
-    } else {
-        ESP_LOGW(TAG, "esp_read_mac failed: %s, using fixed SSID suffix",
-                 esp_err_to_name(err));
-        snprintf(ssid, sizeof(ssid), "%s000000", SX_WIFI_DEFAULT_AP_SSID_PREFIX);
+bool sx_wifi_build_default_ap_ssid(char *ssid_out, size_t ssid_out_len)
+{
+    if (ssid_out == NULL || ssid_out_len == 0) {
+        return false;
     }
 
-    return sx_wifi_start_ap(ssid, NULL);
+    uint8_t mac[6] = { 0 };
+    esp_err_t err = esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "esp_read_mac failed: %s", esp_err_to_name(err));
+        return false;
+    }
+
+    snprintf(ssid_out, ssid_out_len, "%s%02X%02X%02X",
+              SX_WIFI_DEFAULT_AP_SSID_PREFIX, mac[3], mac[4], mac[5]);
+    return true;
 }
 
 /* ---- credential storage --------------------------------------------- */
@@ -361,30 +363,4 @@ bool sx_wifi_clear_credentials(void)
         return false;
     }
     return true;
-}
-
-/* ---- policy: STA with AP fallback ------------------------------------ */
-
-bool sx_wifi_start_auto(void)
-{
-    if (!sx_wifi_init()) {
-        ESP_LOGE(TAG, "sx_wifi_start_auto: core init failed");
-        return sx_wifi_start_default_ap();
-    }
-
-    char ssid[SX_WIFI_SSID_MAX_LEN] = { 0 };
-    char password[SX_WIFI_PASSWORD_MAX_LEN] = { 0 };
-
-    if (sx_wifi_load_credentials(ssid, sizeof(ssid), password, sizeof(password))) {
-        ESP_LOGI(TAG, "Found saved credentials for SSID '%s', attempting STA connect", ssid);
-        if (sx_wifi_start_sta(ssid, password)) {
-            return true;
-        }
-        ESP_LOGW(TAG, "Saved-credential STA connect failed, falling back to AP mode");
-    } else {
-        ESP_LOGI(TAG, "No saved Wi-Fi credentials, starting AP mode for configuration");
-    }
-
-    sx_wifi_start_default_ap();
-    return false;
 }

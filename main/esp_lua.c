@@ -15,6 +15,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "esp_log.h"
 
@@ -61,16 +62,51 @@ static bool http_run_lua_cb(const char *body, size_t body_len, void *user_ctx)
     return sx_lua_runtime_run_string(runtime, body);
 }
 
+/* Wi-Fi policy lives here, not in sx_wifi: this app decides that a
+ * saved-credential STA attempt is tried first, and a fallback AP is
+ * used if there are no saved credentials or the STA attempt fails.
+ * sx_wifi itself has no opinion on any of this -- it only exposes
+ * start_sta() / start_ap() / load_credentials() as mechanism. */
+static void connect_wifi_or_start_ap(void)
+{
+    if (!sx_wifi_init()) {
+        ESP_LOGE(TAG, "sx_wifi_init failed, cannot bring up networking");
+        return;
+    }
+
+    char ssid[SX_WIFI_SSID_MAX_LEN] = { 0 };
+    char password[SX_WIFI_PASSWORD_MAX_LEN] = { 0 };
+
+    bool have_credentials = sx_wifi_load_credentials(ssid, sizeof(ssid),
+                                                       password, sizeof(password));
+    if (have_credentials) {
+        ESP_LOGI(TAG, "Found saved credentials for SSID '%s', attempting STA connect", ssid);
+        if (sx_wifi_start_sta(ssid, password)) {
+            ESP_LOGI(TAG, "Wi-Fi up in STA mode");
+            return;
+        }
+        ESP_LOGW(TAG, "Saved-credential STA connect failed, falling back to AP mode");
+    } else {
+        ESP_LOGI(TAG, "No saved Wi-Fi credentials, starting AP mode for configuration");
+    }
+
+    char ap_ssid[SX_WIFI_SSID_MAX_LEN] = { 0 };
+    if (!sx_wifi_build_default_ap_ssid(ap_ssid, sizeof(ap_ssid))) {
+        strlcpy(ap_ssid, "ESP32-LUA-SETUP", sizeof(ap_ssid));
+    }
+
+    if (sx_wifi_start_ap(ap_ssid, NULL)) {
+        ESP_LOGW(TAG, "Wi-Fi up in fallback AP mode (SSID '%s', open network)", ap_ssid);
+    } else {
+        ESP_LOGE(TAG, "Failed to start fallback AP -- no network interface available");
+    }
+}
+
 void app_main(void)
 {
     ESP_LOGI(TAG, "Starting esp32_lua on ESP32-S3-N16R8");
 
-    bool sta_connected = sx_wifi_start_auto();
-    if (sta_connected) {
-        ESP_LOGI(TAG, "Wi-Fi up in STA mode");
-    } else {
-        ESP_LOGW(TAG, "Wi-Fi up in fallback AP mode (no STA connection)");
-    }
+    connect_wifi_or_start_ap();
 
     if (!sx_lua_runtime_init(&s_runtime)) {
         ESP_LOGE(TAG, "Failed to initialize Lua runtime");

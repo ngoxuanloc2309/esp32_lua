@@ -16,20 +16,20 @@ extern "C" {
  * (which do not start networking themselves) have something to
  * listen on.
  *
- * Policy (which mode to use, when to fall back) lives in the app
- * layer via sx_wifi_start_auto(); this service only provides the
- * mechanism (start_sta / start_ap / credential storage) so it stays
- * reusable across boards and provisioning flows. */
+ * This service provides mechanism only: start_sta(), start_ap(),
+ * credential save/load. It has no opinion on which mode to use, when
+ * to fall back from STA to AP, or when credentials should be loaded
+ * versus discarded -- all of that is policy, decided entirely by the
+ * caller (main/esp_lua.c). This service will never call itself; it
+ * only ever runs a function when the app layer calls it. */
 
 #define SX_WIFI_SSID_MAX_LEN     32   /* IEEE 802.11 SSID limit */
 #define SX_WIFI_PASSWORD_MAX_LEN 64   /* WPA2-PSK passphrase limit */
 
-/* Default SoftAP identity used by sx_wifi_start_auto() when no STA
- * connection could be established. Open network (no password) so a
- * phone/laptop can join without prior knowledge -- the device is
- * expected to be physically accessible when this path is hit (first
- * boot / lost credentials), and the AP only serves the local
- * configuration web UI, not production traffic. */
+/* Default SoftAP identity. This is just a constant the app layer may
+ * use when calling sx_wifi_start_ap() / building an SSID -- the
+ * service does not use it itself and has no "default AP" behavior of
+ * its own. */
 #define SX_WIFI_DEFAULT_AP_SSID_PREFIX "ESP32-LUA-"   /* + last 3 bytes of MAC */
 #define SX_WIFI_DEFAULT_AP_CHANNEL      1
 #define SX_WIFI_DEFAULT_AP_MAX_CONN     4
@@ -62,20 +62,21 @@ bool sx_wifi_start_sta(const char *ssid, const char *password);
  * Returns true once the AP is up. */
 bool sx_wifi_start_ap(const char *ap_ssid, const char *ap_password);
 
-/* Convenience wrapper around sx_wifi_start_ap() that derives a unique
- * SSID from the device's Wi-Fi MAC address
- * (SX_WIFI_DEFAULT_AP_SSID_PREFIX + last 3 MAC bytes as hex) and
- * starts an open network. Used by sx_wifi_start_auto()'s fallback
- * path and available directly for an app that wants "factory reset /
- * force config mode" behavior. */
-bool sx_wifi_start_default_ap(void);
+/* Reads the device's Wi-Fi MAC address and formats it into a unique
+ * SSID as SX_WIFI_DEFAULT_AP_SSID_PREFIX + last 3 MAC bytes (hex).
+ * Pure helper: does not start anything, does not touch NVS or the
+ * Wi-Fi driver's mode. The app layer calls this to build an SSID to
+ * pass into sx_wifi_start_ap() if it wants a MAC-derived name;
+ * nothing requires it be used. out_len should be at least
+ * SX_WIFI_SSID_MAX_LEN. Returns true on success. */
+bool sx_wifi_build_default_ap_ssid(char *ssid_out, size_t ssid_out_len);
 
 /* Saves STA credentials to NVS so a future sx_wifi_load_credentials()
- * (including the one inside sx_wifi_start_auto()) picks them up.
- * Intended to be called from the app-layer HTTP handler that accepts
- * Wi-Fi configuration from the user (e.g. POST /wifi_config), after
- * which the app typically reboots or calls sx_wifi_start_sta() to
- * apply them immediately.
+ * call picks them up. Pure storage -- does not start, stop, or affect
+ * any currently running Wi-Fi mode. The app layer decides when to
+ * call this (e.g. from an HTTP handler that accepts Wi-Fi
+ * configuration from the user) and what to do afterwards (reboot,
+ * call sx_wifi_start_sta() immediately, etc).
  *
  * ssid/password must fit within SX_WIFI_SSID_MAX_LEN /
  * SX_WIFI_PASSWORD_MAX_LEN (including the NUL terminator). Returns
@@ -85,28 +86,17 @@ bool sx_wifi_save_credentials(const char *ssid, const char *password);
 /* Loads previously saved STA credentials from NVS into the given
  * output buffers (both NUL-terminated on success). Returns false if
  * no credentials have ever been saved (first boot) or the NVS read
- * fails; in that case *ssid_out/*password_out are left untouched. */
+ * fails; in that case ssid_out and password_out are left untouched.
+ * Pure storage read -- does not start anything. The app layer decides
+ * what to do with the result (call start_sta, fall back to start_ap,
+ * etc). */
 bool sx_wifi_load_credentials(char *ssid_out, size_t ssid_out_len,
                                char *password_out, size_t password_out_len);
 
-/* Erases any saved STA credentials from NVS. Used by a future
- * "factory reset" / "forget network" app-layer action. Returns true
- * if the erase succeeded or there was nothing to erase. */
+/* Erases any saved STA credentials from NVS. Used by an app-layer
+ * "factory reset" / "forget network" action. Returns true if the
+ * erase succeeded or there was nothing to erase. */
 bool sx_wifi_clear_credentials(void);
-
-/* Policy entrypoint intended for app_main(): loads saved STA
- * credentials and attempts sx_wifi_start_sta(). If no credentials are
- * saved, or the connection attempt fails, falls back to
- * sx_wifi_start_default_ap() so the device is always reachable
- * (either on the configured network, or via its own AP for
- * reconfiguration).
- *
- * Returns true if the device ends up connected in STA mode, false if
- * it fell back to AP mode. Either way the device has a usable network
- * interface for sx_http_server_start() by the time this returns --
- * callers only need to branch on the return value if they want to
- * log/display which mode is active. */
-bool sx_wifi_start_auto(void);
 
 #ifdef __cplusplus
 }

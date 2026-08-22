@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "esp_lua",
-    "project_version":    "6918a66-dirty",
+    "project_version":    "4cbf997-dirty",
     "project_path":       "E:/prj_canhan/remote/esp32_lua",
     "idf_path":           "E:/esp32_idf/env/Espressif/frameworks/esp-idf-v5.4.3",
     "build_dir":          "E:/prj_canhan/remote/esp32_lua/build",
