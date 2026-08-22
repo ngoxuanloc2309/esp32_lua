@@ -13,6 +13,7 @@
 file(GLOB_RECURSE SERVICES_SRCS
     "${CMAKE_CURRENT_LIST_DIR}/lua_runtime/*.c"
     "${CMAKE_CURRENT_LIST_DIR}/http_server/*.c"
+    "${CMAKE_CURRENT_LIST_DIR}/wifi/*.c"
 )
 
 idf_component_register(
@@ -20,6 +21,7 @@ idf_component_register(
     INCLUDE_DIRS
         "lua_runtime"
         "http_server"
+        "wifi"
         # Add new service include dirs here, e.g. "mqtt_runtime"
-    REQUIRES lua_component esp_http_server
+    REQUIRES lua_component esp_http_server esp_wifi esp_netif esp_event nvs_flash
 )
