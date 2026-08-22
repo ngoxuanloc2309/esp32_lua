@@ -8,5 +8,5 @@
 idf_component_register(
     SRCS "gpio_binding_app.c"
     INCLUDE_DIRS "."
-    REQUIRES sx_gpio lua_runtime driver
+    REQUIRES gpio lua_runtime driver
 )
