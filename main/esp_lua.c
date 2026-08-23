@@ -26,6 +26,20 @@
 
 static const char *TAG = "esp_lua";
 
+/* Hardcoded Wi-Fi STA credentials for this test build.
+ *
+ * Temporary: this exists only because POST /wifi_config (writing
+ * credentials into NVS via sx_wifi_save_credentials()) is not built
+ * yet. Once that endpoint exists, this define goes away and
+ * connect_wifi_or_start_ap() below goes back to relying solely on
+ * sx_wifi_load_credentials(). Until then, change these two lines
+ * whenever the test network changes -- nothing else in this file
+ * needs to change.
+ *
+ * WIFI_PASS may be "" for an open network. */
+#define WIFI_SSID "Log Terminal "
+#define WIFI_PASS "locdeptrai"
+
 /* The Lua runtime lives for the lifetime of app_main() (it never
  * returns on a normal boot), so it's held here as a static rather
  * than a stack variable, and its address is what gets passed as the
@@ -63,10 +77,11 @@ static bool http_run_lua_cb(const char *body, size_t body_len, void *user_ctx)
 }
 
 /* Wi-Fi policy lives here, not in sx_wifi: this app decides that a
- * saved-credential STA attempt is tried first, and a fallback AP is
- * used if there are no saved credentials or the STA attempt fails.
- * sx_wifi itself has no opinion on any of this -- it only exposes
- * start_sta() / start_ap() / load_credentials() as mechanism. */
+ * saved-credential STA attempt is tried first, then the hardcoded
+ * WIFI_SSID/WIFI_PASS test credentials above, and a fallback AP is
+ * used only if neither works. sx_wifi itself has no opinion on any
+ * of this -- it only exposes start_sta() / start_ap() /
+ * load_credentials() as mechanism. */
 static void connect_wifi_or_start_ap(void)
 {
     if (!sx_wifi_init()) {
@@ -77,18 +92,23 @@ static void connect_wifi_or_start_ap(void)
     char ssid[SX_WIFI_SSID_MAX_LEN] = { 0 };
     char password[SX_WIFI_PASSWORD_MAX_LEN] = { 0 };
 
-    bool have_credentials = sx_wifi_load_credentials(ssid, sizeof(ssid),
-                                                       password, sizeof(password));
-    if (have_credentials) {
+    if (sx_wifi_load_credentials(ssid, sizeof(ssid), password, sizeof(password))) {
         ESP_LOGI(TAG, "Found saved credentials for SSID '%s', attempting STA connect", ssid);
         if (sx_wifi_start_sta(ssid, password)) {
-            ESP_LOGI(TAG, "Wi-Fi up in STA mode");
+            ESP_LOGI(TAG, "Wi-Fi up in STA mode (saved credentials)");
             return;
         }
-        ESP_LOGW(TAG, "Saved-credential STA connect failed, falling back to AP mode");
+        ESP_LOGW(TAG, "Saved-credential STA connect failed, trying hardcoded test credentials");
     } else {
-        ESP_LOGI(TAG, "No saved Wi-Fi credentials, starting AP mode for configuration");
+        ESP_LOGI(TAG, "No saved Wi-Fi credentials, trying hardcoded test credentials");
     }
+
+    ESP_LOGI(TAG, "Attempting STA connect with hardcoded WIFI_SSID '%s'", WIFI_SSID);
+    if (sx_wifi_start_sta(WIFI_SSID, WIFI_PASS)) {
+        ESP_LOGI(TAG, "Wi-Fi up in STA mode (hardcoded test credentials)");
+        return;
+    }
+    ESP_LOGW(TAG, "Hardcoded STA connect failed, falling back to AP mode");
 
     char ap_ssid[SX_WIFI_SSID_MAX_LEN] = { 0 };
     if (!sx_wifi_build_default_ap_ssid(ap_ssid, sizeof(ap_ssid))) {
